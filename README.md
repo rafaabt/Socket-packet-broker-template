@@ -18,7 +18,6 @@ Run instances of a server (first), followed by the client, as follows
 
 First, instantiate a server to listen to a specific port:
 ```
-
 Server *serv = new Server(PORT);
 thread thLoop(Server::LoopRequests, ref(serv));
 thConn.join();
@@ -28,7 +27,7 @@ thConn.join();
 
 Run a client process to connect to the server:
 ```
-cli = new Client(<some integer id>);
+Client *cli = new Client(<some integer id>);
 cli->conn(ADDR, PORT);
 cli->login("some alias");
 ```
