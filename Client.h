@@ -11,6 +11,11 @@
 #include "Packet.h"
 
 
+//! Client class  
+/*!   
+ * This class models a simple client for socket programming. 
+ **/
+
 class Client: public Stream
 {
 public:
@@ -20,8 +25,9 @@ public:
 		packetId = 0;
 	}
 
-	void conn(const char *addr, unsigned int port);
-	void login (const char *alias);
+ 	/**< A more detailed description */
+	void conn(const char *addr, unsigned int port); //!< Connects to the server listening on a specific address and port
+	void login (const char *alias);  //!< Logs to the server
 	void insertPacket (const char *msg, size_t receiverId);
 	void removePacket (size_t pos);
 	void downloadPackets ();

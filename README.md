@@ -6,13 +6,17 @@ This repo implements a basic template for C++ socket programming (client/server 
 
 
 ## Compiling the code
-
 Run the two makefiles (server and client sides).
 
+
+## Runnig the applications
+Run instances of a server (first), followed by the client running in another terminal, as follows:
+```
+./server
+./client
+```
+
 ## Code examples
-
-Run instances of a server (first), followed by the client, as follows
-
 
 ### Server side
 

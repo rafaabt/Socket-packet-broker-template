@@ -20,6 +20,12 @@ using namespace std;
 extern mutex mtxLock;
 
 
+//! Server class  
+/*!   
+ * This class models a simple server for socket programming. 
+ **/
+
+
 class Server: public Stream
 {
 public:
