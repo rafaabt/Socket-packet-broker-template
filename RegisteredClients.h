@@ -3,6 +3,11 @@
 #define REG_CLI__H
 
 
+/*!   
+ *  RegisteredClient 
+ * 	Manages the packet que for each client 
+ **/
+
 typedef struct  _RegisteredClient
 {
 	int id;
@@ -10,7 +15,7 @@ typedef struct  _RegisteredClient
 
 	int sockChannel;
 	bool connected = false;
-	MsgQueue msgQueue;
+	MsgQueue msgQueue;	//!< The queue of messages inserted by the client
 
 	void insertPacket (const Packet &packet)
 	{

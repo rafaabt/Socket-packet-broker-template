@@ -38,29 +38,28 @@ typedef struct _Header
 } PacketHeader;
 
 
-/*
-	A Packet is a unit of data transfer between a client and a server.
-*/
+/*!   
+ *  A Packet is a unit of data transfer between a client and a server. 
+ **/
+
 typedef struct _Packet
 {
 	_Packet(){}
 
 	PacketHeader header;
-	uint32_t cmd;			  // requested command
-	uint32_t field;			  // general-purpose field
- 	void *buffer[BUFF_SIZE];  // generic information (e.g., string messages or structured data...)
+	uint32_t cmd;			  //!< Requested command
+	uint32_t field;			  //!< General-purpose field
+ 	void *buffer[BUFF_SIZE];  //!< Generic information (e.g., string messages or structured data...)
 } Packet;
 
 
 
-/*
-	MsgQueue resides in the server-side.
-	Each connected client keeps a MsgQueue, consisted of a vector o Packets
-*/
+/*!
+	MsgQueue resides in the server-side. Each connected client keeps a MsgQueue, consisted of a vector o Packets
+**/
 
-typedef struct _MsgQueue
 {
-	std::vector<Packet> packets; //[MAX_PACKETS];
+	std::vector<Packet> packets; //!< The packets inserted by each client
 	size_t nPackets;
 
 	 _MsgQueue()

@@ -85,6 +85,10 @@ public:
 		}
 	}
 
+/*!  void loop (RegisteredClient &client);
+    \brief Creates a child process to wait for client requests
+*/
+
 	void loop (RegisteredClient &client);
 	void sendMsgNoResp (const char *msg, RegisteredClient& client);
 	Packet recvPacket (RegisteredClient& client);

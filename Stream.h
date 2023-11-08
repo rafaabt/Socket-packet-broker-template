@@ -11,8 +11,14 @@ using namespace std;
 
 
 /*
-	Opens sockets file descriptors and handles the send/recv to transfer packets from client(server) to server(client) 
+	
 */
+
+
+/*!   
+ * Stream class. Handles low-level socket file descriptors
+ * Opens sockets file descriptors and handles the send/recv to transfer packets from client(server) to server(client) 
+ **/
 
 
 class Stream
