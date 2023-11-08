@@ -1,0 +1,13 @@
+CC=g++
+
+c: CliDriver.o Client.o
+	${CC} CliDriver.o Client.o -o c
+
+CliDriver.o: CliDriver.cpp Client.o
+	${CC} CliDriver.cpp -c
+
+Client.o: Client.cpp Client.h Stream.h Packet.h utils.h
+	${CC} Client.cpp -c
+
+clean: 
+	rm Client.o CliDriver.o

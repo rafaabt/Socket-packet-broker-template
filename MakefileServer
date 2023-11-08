@@ -1,0 +1,13 @@
+CC=g++
+
+s: ServDriver.o Server.o
+	${CC} ServDriver.o Server.o -lpthread -o s
+
+ServDriver.o: ServDriver.cpp Server.o
+	${CC} ServDriver.cpp -c
+
+Server.o: Server.cpp Server.h RegisteredClients.h Stream.h Packet.h utils.h
+	${CC} Server.cpp -c
+
+clean: 
+	rm Server.o ServDriver.o
