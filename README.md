@@ -9,7 +9,7 @@ This repo implements a basic template for C++ socket programming (client/server 
 
 Run the two makefiles (server and client sides).
 
-## Examples
+## Code examples
 
 Run instances of a server (first), followed by the client, as follows
 
@@ -19,7 +19,7 @@ Run instances of a server (first), followed by the client, as follows
 First, instantiate a server to listen to a specific port:
 ```
 Server *serv = new Server(PORT);
-thread thLoop(Server::LoopRequests, ref(serv));
+thread thLoop(Server::LoopRequests, ref(serv)); // waits for new connections on a dedicated thread
 thConn.join();
 ```
 
@@ -34,9 +34,9 @@ cli->login("some alias");
 
 Then make requests, for example:
 ```
-cli->sendMsg("some message");
-cli->insertPacket("Some message", <id of a destination client>);
-cli->insertPacket("Other message", <id of a destination client>);
+cli->sendMsg("Some message"); 
+cli->insertPacket("Some message to client of id 42", 42);
+cli->insertPacket("Other message to client of id 55", 55);
 cli->removePacket(0);   // Deletes the packet of index 0
 cli->downloadPackets(); // Downloads all packets sent to this client
 cli->closeConn();
