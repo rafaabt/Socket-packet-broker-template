@@ -1,7 +1,7 @@
 CC=g++
 
 s: ServDriver.o Server.o
-	${CC} ServDriver.o Server.o -lpthread -o s
+	${CC} ServDriver.o Server.o -lpthread -o server
 
 ServDriver.o: ServDriver.cpp Server.o
 	${CC} ServDriver.cpp -c

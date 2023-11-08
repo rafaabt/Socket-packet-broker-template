@@ -1,7 +1,7 @@
 CC=g++
 
 c: CliDriver.o Client.o
-	${CC} CliDriver.o Client.o -o c
+	${CC} CliDriver.o Client.o -o client
 
 CliDriver.o: CliDriver.cpp Client.o
 	${CC} CliDriver.cpp -c
