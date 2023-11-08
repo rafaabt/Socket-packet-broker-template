@@ -10,11 +10,8 @@ Run the two makefiles (server and client sides).
 
 
 ## Runnig the applications
-Run instances of a server (first), followed by the client running in another terminal, as follows:
-```
-./server
-./client
-```
+Run instances of a server (first), followed by the client running in another terminal.
+
 
 ## Code examples
 
