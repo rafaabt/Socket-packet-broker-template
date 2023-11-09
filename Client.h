@@ -25,6 +25,8 @@ public:
 		packetId = 0;
 	}
 
+	~Client()
+	{}
  	/**< A more detailed description */
 	void conn(const char *addr, unsigned int port); //!< Connects to the server listening on a specific address and port
 	void login (const char *alias);  //!< Logs to the server
@@ -37,6 +39,7 @@ public:
 
 	void insertPacket (const char *msg, size_t receiverId);
 	void removePacket (size_t pos);
+	uint32_t getNumberOfPackets ();
 	void downloadPackets ();
 	void clearPackets ();
 	void sendMsg (const char *msg);

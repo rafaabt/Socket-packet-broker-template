@@ -61,37 +61,41 @@ void Client::removePacket (size_t packetId)
 	printf ("[Resp] %s\n", (char*)rcv.buffer);
 }
 
-void Client::downloadPackets ()
+
+uint32_t Client::getNumberOfPackets ()
 {
 	Packet pSend;
 	pSend.header.senderId = id;
 	pSend.cmd = CMD_GET_NUMBER_OF_PACKETS;
 
 	Packet pkt = streamSendPacket (pSend);
+	
+	printf("[Resp] %s\n", (char*)pkt.buffer);
+	return pkt.field;
+}
 
-	uint32_t nPackets = pkt.field;
 
+void Client::downloadPackets ()
+{
+	uint32_t nPackets = getNumberOfPackets();
+
+	Packet pSend;
+
+	if (nPackets == 0)
+		return;
+	
 	pSend.cmd = CMD_DOWNLOAD_PACKETS;
 
 	streamSendPacketNoResp (pSend);
 	
 	printf("Total packets: %u\n", nPackets);
 
-	if (nPackets == 0)
+	printf("[Resp]: \n");
+
+	for (size_t i = 0 ; i < nPackets; i++)
 	{
 		Packet pRecv = streamRecvPacket ();
-		printf("[Resp] %s\n", (char*)pRecv.buffer);
-	}
-
-	else
-	{
-		printf("[Resp]: \n");
-
-		for (size_t i = 0 ; i < nPackets; i++)
-		{
-			Packet pRecv = streamRecvPacket ();
-			printf(" %s (packet %u) (client %u)\n", (char*)pRecv.buffer, pRecv.header.packetId, pRecv.header.senderId);
-		}
+		printf(" %s (packet %u) (client %u)\n", (char*)pRecv.buffer, pRecv.header.packetId, pRecv.header.senderId);
 	}
 }
 
@@ -133,11 +137,11 @@ void Client::sendMsgNoResp (const char *msg)
 void Client::closeConn ()
 {
 	Packet pSend;
-	pSend.cmd = CMD_UNREG_CLI;
+	pSend.cmd = CMD_LOGOFF;
 
 	Packet pkt = streamSendPacket (pSend);
 	printf ("[Resp] %s\n", (char*)pkt.buffer);
 	
 	close(sockChannel);
-	exit(0);
+	//exit(0);
 }

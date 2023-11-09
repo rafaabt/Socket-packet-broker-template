@@ -17,7 +17,6 @@
 
 using namespace std;
 
-extern mutex mtxLock;
 
 
 //! Server class  
@@ -35,6 +34,10 @@ public:
 		registerClients.clear();
 	}
 
+	~Server ()
+	{
+		registerClients.clear();
+	}
 
 	/*
 		LoopConnections(): A thread to accept new connections
@@ -97,6 +100,7 @@ public:
 
 private:
 	vector<RegisteredClient> registerClients;
+	map<uint32_t, RegisteredClient*> mapClient;
 	uint32_t nOnClients;
 };
 

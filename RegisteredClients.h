@@ -1,7 +1,11 @@
 #ifndef REG_CLI__H
-
 #define REG_CLI__H
 
+
+#include <mutex>
+
+
+extern mutex mtxLock;
 
 /*!   
  *  RegisteredClient 
@@ -19,12 +23,16 @@ typedef struct  _RegisteredClient
 
 	void insertPacket (const Packet &packet)
 	{
+		mtxLock.lock();
 		msgQueue.insert(packet);
+		mtxLock.unlock();
 	}
 
 	void removePacketById (ssize_t id)
 	{
+		mtxLock.unlock();
 		msgQueue.removePacketById(id);
+		mtxLock.unlock();
 	}
 
 	void listPackets ()
@@ -34,7 +42,9 @@ typedef struct  _RegisteredClient
 
 	void clearPackets()
 	{
+		mtxLock.lock();
 		msgQueue.clearPackets();
+		mtxLock.unlock();
 	}
 
 } RegisteredClient;

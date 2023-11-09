@@ -16,7 +16,7 @@ enum  // Client->Server commands
 	CMD_INSERT_PACKET,
 	CMD_REMOVE_PACKET,
 	CMD_CLEAR_PACKETS,
-	CMD_UNREG_CLI,
+	CMD_LOGOFF,
 	CMD_LIST_CLI,
 	CMD_DOWNLOAD_PACKETS,
 	CMD_GET_NUMBER_OF_PACKETS
@@ -57,20 +57,19 @@ typedef struct _Packet
 /*!
 	MsgQueue resides in the server-side. Each connected client keeps a MsgQueue, consisted of a vector o Packets
 **/
-
+typedef struct _MsgQueue
 {
 	std::vector<Packet> packets; //!< The packets inserted by each client
-	size_t nPackets;
 
 	 _MsgQueue()
 	 {
-	 	nPackets = 0;
+	 	//nPackets = 0;
 	 }
 
 	void insert (const Packet &packet)
 	{
 		packets.push_back (packet);
-		nPackets++;
+		//nPackets++;
 	}
 
 
@@ -81,7 +80,7 @@ typedef struct _Packet
 			if (it->header.packetId == id)
 			{
 				packets.erase(it);
-				nPackets--;
+				//nPackets--;
 				break;
 			}
 		}
@@ -90,14 +89,14 @@ typedef struct _Packet
 	void clearPackets()
 	{
 		packets.clear();
-		nPackets = 0;
+		//nPackets = 0;
 	}
 
 	void list ()
 	{
 		uint32_t senderId = packets[0].header.senderId;
 
-		std::cout << "Client: " << senderId << " / " << "Packets: " << nPackets << std::endl;
+		//std::cout << "Client: " << senderId << " / " << "Packets: " << nPackets << std::endl;
 
 		for (Packet pkt: packets)
 			std::cout << (char*)pkt.buffer << std::endl;

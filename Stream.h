@@ -69,6 +69,11 @@ public:
 		}
 	}
 
+	~Stream()
+	{
+		close (sockServConn);
+		close (sockChannel);
+	}
 
 	Packet streamSendPacket(const Packet &pSend, int channel) // sends the packet, and waits for the response
 	{
