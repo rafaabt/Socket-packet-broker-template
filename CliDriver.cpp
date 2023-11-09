@@ -37,7 +37,7 @@ int main(int argc, char const* argv[])
 		{
 			char str[100];
 			sprintf (str, "Message %d from client %i", j, i);
-			cli[i]->insertPacket(str, 1); 
+			cli[i]->insertPacket(str, 0); 
 			//cli[i]->sendMsg(str);
 		}
 	}
