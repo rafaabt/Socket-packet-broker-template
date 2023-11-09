@@ -34,9 +34,9 @@ Run a client process to connect to the server:
 #define ADDR "127.0.0.1"
 #define PORT 8080
 
-Client *cli = new Client(<some integer id>);
+Client *cli = new Client();
 cli->conn(ADDR, PORT);
-cli->login("some alias");
+cli->login("Some alias");
 ```
 
 Then make requests, for example:

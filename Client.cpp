@@ -32,6 +32,10 @@ void Client::login (const char *alias)
 
 	strcpy ((char*)pSend.buffer, alias);
 	Packet rcv = streamSendPacket (pSend);
+
+	id = rcv.field;
+	
+	//printf ("New assigned id is %d\n", id);
 	printf ("[Resp] %s\n", (char*)rcv.buffer);
 }
 
@@ -82,7 +86,10 @@ void Client::downloadPackets ()
 	Packet pSend;
 
 	if (nPackets == 0)
+	{
+		printf ("No packets to download...\n");
 		return;
+	}
 	
 	pSend.cmd = CMD_DOWNLOAD_PACKETS;
 
@@ -138,10 +145,8 @@ void Client::closeConn ()
 {
 	Packet pSend;
 	pSend.cmd = CMD_LOGOFF;
-
+	bzero (pSend.buffer, sizeof(void*)*BUFF_SIZE);
 	Packet pkt = streamSendPacket (pSend);
 	printf ("[Resp] %s\n", (char*)pkt.buffer);
-	
-	close(sockChannel);
-	//exit(0);
+	close(sockChannel);	
 }

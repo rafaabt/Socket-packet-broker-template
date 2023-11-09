@@ -14,8 +14,12 @@
 #include "RegisteredClients.h"
 
 #define MAX_ON_CLIENTS 100
+#define FINISHED       0x2A
 
 using namespace std;
+
+
+extern mutex mtxLock;
 
 
 
@@ -59,18 +63,13 @@ public:
 				exit(EXIT_FAILURE);
 			}
 
-			//mtxLock.lock();
-
 			RegisteredClient newClient;
-			newClient.id          = serv->nOnClients;
+		
 			newClient.sockChannel = newSock;
 
+			mtxLock.lock();
 			serv->registerClients.push_back(newClient);
-
-			serv->loop (serv->registerClients[serv->nOnClients]);
-			serv->nOnClients++;
-			//printf("Registered new client (total %u)\n", serv->nOnClients);
-			//mtxLock.unlock();
+			mtxLock.unlock();
 		}
 	} 
 
@@ -80,10 +79,17 @@ public:
 		while (true)
 		{
 			vector<RegisteredClient>::iterator it;
+			size_t nCli;
 
-			for (it = serv->registerClients.begin(); it != serv->registerClients.end(); it++)
+			mtxLock.lock();
+			nCli = serv->registerClients.size();
+			mtxLock.unlock();
+
+			for (int i = 0; i < nCli; i++)
 			{
-				serv->loop (*it);
+				mtxLock.lock();
+				serv->loop (serv->registerClients[i]);
+				mtxLock.unlock();
 			}
 		}
 	}

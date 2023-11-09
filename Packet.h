@@ -19,9 +19,10 @@ enum  // Client->Server commands
 	CMD_LOGOFF,
 	CMD_LIST_CLI,
 	CMD_DOWNLOAD_PACKETS,
-	CMD_GET_NUMBER_OF_PACKETS
+	CMD_GET_NUMBER_OF_PACKETS,
 } Cmd;
 
+extern const char *cmdStrings[20];
 
 typedef struct _Header
 {
