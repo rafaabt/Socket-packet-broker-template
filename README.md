@@ -23,8 +23,11 @@ creates a per-client child process to serve client requests. First, instantiate 
 #define PORT 8080
 
 Server *serv = new Server(PORT);
-thread thLoop(Server::LoopRequests, ref(serv)); // the waits for new connections in a dedicated thread
+thread thConn(Server::LoopConnections, ref(serv));  // A thread to accept new incoming client connections
+thread thLoop(Server::LoopRequests,    ref(serv));	// Another thread to handle client requests
+
 thConn.join();
+thLoop.join();
 ```
 
 ### Client side
