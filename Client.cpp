@@ -3,18 +3,18 @@
 
 void Client::conn(const char *addr, unsigned int port)
 {
-	int status;
+    int status;
 
     address.sin_port = htons(port);
 
-	// Convert IPv4 and IPv6 addresses from text to binary form
+    // Convert IPv4 and IPv6 addresses from text to binary form
     if (inet_pton(AF_INET, addr, &address.sin_addr) <= 0) 
     {
         printf("\nInvalid address/ Address not supported \n");
         exit(0);
     }
 
-	if ((status = connect(sockChannel, (struct sockaddr*)&address, sizeof(address))) < 0) 
+    if ((status = connect(sockChannel, (struct sockaddr*)&address, sizeof(address))) < 0) 
     {
         printf("\nConnection Failed \n");
         exit(0);
@@ -24,129 +24,130 @@ void Client::conn(const char *addr, unsigned int port)
 
 void Client::login (const char *alias)
 {
-	Packet pSend;
+    Packet pSend;
 
-	pSend.header.senderId   = id;
-	pSend.header.receiverId = -1;
-	pSend.cmd = CMD_LOGIN;
+    pSend.header.senderId   = id;
+    pSend.header.receiverId = -1;
+    pSend.cmd = CMD_LOGIN;
 
-	strcpy ((char*)pSend.buffer, alias);
-	Packet rcv = streamSendPacket (pSend);
+    strcpy ((char*)pSend.buffer, alias);
+    Packet rcv = streamSendPacket (pSend);
 
-	id = rcv.field;
-	
-	//printf ("New assigned id is %d\n", id);
-	printf ("[Resp] %s\n", (char*)rcv.buffer);
+    id = rcv.field;
+
+    //printf ("New assigned id is %d\n", id);
+    printf ("[Resp] %s\n", (char*)rcv.buffer);
 }
 
 
 void Client::insertPacket (const char *msg, size_t receiverId)
 {	
-	Packet pSend;
-	pSend.header.senderId   = id;
-	pSend.header.receiverId = receiverId;
-	pSend.header.packetId   = packetId++;
-	pSend.cmd = CMD_INSERT_PACKET;
+    Packet pSend;
+    pSend.header.senderId   = id;
+    pSend.header.receiverId = receiverId;
+    pSend.header.packetId   = packetId++;
+    pSend.cmd = CMD_INSERT_PACKET;
 
-	strcpy ((char*)pSend.buffer, msg);
-	Packet rcv = streamSendPacket (pSend);
-	printf ("[Resp] %s\n", (char*)rcv.buffer);
+    strcpy ((char*)pSend.buffer, msg);
+    Packet rcv = streamSendPacket (pSend);
+    printf ("[Resp] %s\n", (char*)rcv.buffer);
 }
 
 void Client::removePacket (size_t packetId)
 {	
-	Packet pSend;
-	pSend.header.senderId = id;
-	pSend.cmd   = CMD_REMOVE_PACKET;
-	pSend.field = packetId;
+    Packet pSend;
+    pSend.header.senderId = id;
+    pSend.cmd   = CMD_REMOVE_PACKET;
+    pSend.field = packetId;
 
 
-	Packet rcv = streamSendPacket (pSend);
-	printf ("[Resp] %s\n", (char*)rcv.buffer);
+    Packet rcv = streamSendPacket (pSend);
+    printf ("[Resp] %s\n", (char*)rcv.buffer);
 }
 
 
 uint32_t Client::getNumberOfPackets ()
 {
-	Packet pSend;
-	pSend.header.senderId = id;
-	pSend.cmd = CMD_GET_NUMBER_OF_PACKETS;
+    Packet pSend;
+    pSend.header.senderId = id;
+    pSend.cmd = CMD_GET_NUMBER_OF_PACKETS;
 
-	Packet pkt = streamSendPacket (pSend);
-	
-	printf("[Resp] %s\n", (char*)pkt.buffer);
-	return pkt.field;
+    Packet pkt = streamSendPacket (pSend);
+
+    //printf("[Resp] %s\n", (char*)pkt.buffer);
+    return pkt.field;
 }
 
 
 void Client::downloadPackets ()
 {
-	uint32_t nPackets = getNumberOfPackets();
+    uint32_t nPackets = getNumberOfPackets();
 
-	Packet pSend;
+    Packet pSend;
 
-	if (nPackets == 0)
-	{
-		printf ("No packets to download...\n");
-		return;
-	}
-	
-	pSend.cmd = CMD_DOWNLOAD_PACKETS;
+    if (nPackets == 0)
+    {
+        printf ("No packets to download...\n");
+        return;
+    }
 
-	streamSendPacketNoResp (pSend);
-	
-	printf("Total packets: %u\n", nPackets);
+    pSend.cmd = CMD_DOWNLOAD_PACKETS;
 
-	printf("[Resp]: \n");
+    Packet pktResp = streamSendPacket (pSend);
+    printf("[Resp] %s\n", (char*)pktResp.buffer);
 
-	for (size_t i = 0 ; i < nPackets; i++)
-	{
-		Packet pRecv = streamRecvPacket ();
-		printf(" %s (packet %u) (client %u)\n", (char*)pRecv.buffer, pRecv.header.packetId, pRecv.header.senderId);
-	}
+    printf("Total packets: %u\n", nPackets);
+
+    printf("[Resp]: \n");
+
+    for (size_t i = 0 ; i < nPackets; i++)
+    {
+        Packet pRecv = streamRecvPacket ();
+        printf(" %s (packet %u) (client %u)\n", (char*)pRecv.buffer, pRecv.header.packetId, pRecv.header.senderId);
+    }
 }
 
 void Client::clearPackets ()
 {
-	Packet pSend;
-	pSend.header.senderId = id;
-	//pSend.header.packetId = packetId++;
-	pSend.cmd = CMD_CLEAR_PACKETS;
+    Packet pSend;
+    pSend.header.senderId = id;
+    //pSend.header.packetId = packetId++;
+    pSend.cmd = CMD_CLEAR_PACKETS;
 
-	Packet pkt = streamSendPacket (pSend);
-	printf ("[Resp] %s\n", (char*)pkt.buffer);
+    Packet pkt = streamSendPacket (pSend);
+    printf ("[Resp] %s\n", (char*)pkt.buffer);
 }
 
 void Client::sendMsg (const char *msg)
 {	
-	Packet pSend;
-	pSend.header.senderId = id;
-	//pSend.header.packetId = packetId++;
-	pSend.cmd = CMD_MSG;
+    Packet pSend;
+    pSend.header.senderId = id;
+    //pSend.header.packetId = packetId++;
+    pSend.cmd = CMD_MSG;
 
-	strcpy ((char*)pSend.buffer, msg);
-	Packet rcv = streamSendPacket (pSend);
-	printf ("[Resp] %s\n", (char*)rcv.buffer);
+    strcpy ((char*)pSend.buffer, msg);
+    Packet rcv = streamSendPacket (pSend);
+    printf ("[Resp] %s\n", (char*)rcv.buffer);
 }
 
 void Client::sendMsgNoResp (const char *msg)
 {	
-	Packet pSend;
-	pSend.header.senderId = id;
-	//pSend.header.packetId = packetId++;
-	pSend.cmd = CMD_MSG;
+    Packet pSend;
+    pSend.header.senderId = id;
+    //pSend.header.packetId = packetId++;
+    pSend.cmd = CMD_MSG;
 
-	strcpy ((char*)pSend.buffer, msg);
-	streamSendPacketNoResp (pSend);
+    strcpy ((char*)pSend.buffer, msg);
+    streamSendPacketNoResp (pSend);
 }
 
 
 void Client::closeConn ()
 {
-	Packet pSend;
-	pSend.cmd = CMD_LOGOFF;
-	bzero (pSend.buffer, sizeof(void*)*BUFF_SIZE);
-	Packet pkt = streamSendPacket (pSend);
-	printf ("[Resp] %s\n", (char*)pkt.buffer);
-	close(sockChannel);	
+    Packet pSend;
+    pSend.cmd = CMD_LOGOFF;
+    bzero (pSend.buffer, sizeof(void*)*BUFF_SIZE);
+    Packet pkt = streamSendPacket (pSend);
+    printf ("[Resp] %s\n", (char*)pkt.buffer);
+    close(sockChannel);	
 }

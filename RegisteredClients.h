@@ -7,39 +7,38 @@
 
 
 /*!   
- *  RegisteredClient 
- * 	Manages the packet que for each client 
- **/
+*  RegisteredClient 
+* 	Manages the packet que for each client 
+**/
 
 typedef struct  _RegisteredClient
 {
-	int id;
-	char alias[30];
+    int id;
+    char alias[30];
 
-	int sockChannel;
-	bool connected = false;
-	MsgQueue msgQueue;	//!< Client message queue
+    int sockChannel;
+    bool connected = false;
+    MsgQueue msgQueue;	//!< Client message queue
 
-	void insertPacket (const Packet &packet)
-	{
-		msgQueue.insert(packet);
-	}
+    void insertPacket (const Packet &packet)
+    {
+        msgQueue.insert(packet);
+    }
 
-	void removePacketById (ssize_t id)
-	{
-		msgQueue.removePacketById(id);
-	}
+    void removePacketById (ssize_t id)
+    {
+        msgQueue.removePacketById(id);
+    }
 
-	void listPackets ()
-	{
-		msgQueue.list();
-	}
+    void listPackets ()
+    {
+        msgQueue.list();
+    }
 
-	void clearPackets()
-	{
-		msgQueue.clearPackets();
-	}
-
+    void clearPackets()
+    {
+        msgQueue.clearPackets();
+    }
 } RegisteredClient;
 
 

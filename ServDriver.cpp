@@ -11,13 +11,13 @@ using namespace std;
 
 int main(int argc, char const* argv[])
 {
-	Server *serv = new Server(PORT);
-	thread thConn(Server::LoopConnections, ref(serv));
-	thread thLoop(Server::LoopRequests,    ref(serv));
+    Server *serv = new Server(PORT);
+    thread thConn(Server::LoopConnections, ref(serv));
+    thread thLoop(Server::LoopRequests,    ref(serv));
 
-	thConn.join();
-	thLoop.join();
+    thConn.join();
+    thLoop.join();
 
-	delete serv;
-	return 0;
+    delete serv;
+    return 0;
 }
