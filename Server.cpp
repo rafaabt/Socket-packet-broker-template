@@ -32,16 +32,10 @@ void Server::loop (RegisteredClient &client)
     {
         Packet pkt; 
 
-        printf ("        -> Waiting for packets...\n");
         pkt = recvPacket(client);
-        printf ("        -> Ok, received\n");
-
+  
         close (fd[0]);
-        //close (1);
-        //dup(fd[1]);
-
         write (fd[1], (void*)&pkt, sizeof(Packet));
-
         exit(0);
     }
 
@@ -49,10 +43,7 @@ void Server::loop (RegisteredClient &client)
     {
         int status;
         wait (&status);
-
-        //close(0);
         close(fd[1]);
-        //dup(fd[0]);
 
         Packet pkt;
 
