@@ -2,8 +2,11 @@
 
 
 mutex mtxLock;
+mutex xxx;
+int lastAcceptedChannel;
 
-const char *cmdStrings[20] = 	
+
+const char *cmdStrings[20] =    
 {
     "CMD_MSG",
     "CMD_LOGIN",
@@ -17,15 +20,18 @@ const char *cmdStrings[20] =
 };
 
 
-void Server::loop (RegisteredClient &client)
+void Server::loop (uint32_t i)
 {
-    char resp[500];
-    int fd[2];
+    char resp[BUFF_SIZE];
+    //int pipeFd[2];
 
-    if (client.sockChannel == CHANNEL_FINISHED)  // If the client has already closed the channel, don't wait for its requests
-        return;	
+    RegisteredClient *client = &registerClients[i];
 
-    pipe(fd);
+    if (client->sockChannel == CHANNEL_FINISHED)  // If the client has already closed the channel, don't wait for its requests
+        return; 
+
+    int r = pipe(client->pipeFd);
+
     pid_t cPid = fork();
 
     if (cPid == 0) // client requests are handled in a child process  
@@ -33,9 +39,8 @@ void Server::loop (RegisteredClient &client)
         Packet pkt; 
 
         pkt = recvPacket(client);
-  
-        close (fd[0]);
-        write (fd[1], (void*)&pkt, sizeof(Packet));
+        close (client->pipeFd[0]);
+        int r = write (client->pipeFd[1], (void*)&pkt, sizeof(Packet));
         exit(0);
     }
 
@@ -43,46 +48,47 @@ void Server::loop (RegisteredClient &client)
     {
         int status;
         wait (&status);
-        close(fd[1]);
+        close(client->pipeFd[1]);
 
         Packet pkt;
-
-        int n = read (fd[0], (void*)&pkt, sizeof(Packet));
+        int n = read (client->pipeFd[0], (void*)&pkt, sizeof(Packet));
 
         printf ("[Request]:\n - Buffer: %s\n - Command: %s\n", (char*)pkt.buffer, cmdStrings[pkt.cmd]);
 
         if (!pkt.header.valid)
         {
             printf("[!!!] Error: invalid packet ignored...\n");
-            //sendMsgNoResp("Err. broken packet received", client);
-            return; //continue;
+            sendMsgNoResp("Err. broken packet received", client);
+            return;
         }
 
-        if (pkt.cmd != CMD_LOGIN && !client.connected)
+        if (pkt.cmd != CMD_LOGIN && !client->connected)
         {
             sendMsgNoResp("Err. Client not logged in", client);
-            return; //continue;
+            return;
         }
 
         switch (pkt.cmd) // Evaluates the request, responds accordingly
         {
             case CMD_LOGIN:
             {
-                client.connected = true;
-                client.id        = nOnClients++; //pkt.header.senderId;
-                //mapClient[client.id] = &client;
+                client->connected = true;
+                client->id        = nOnClients++; //pkt.header.senderId;
 
-                strcpy (client.alias, (const char*)pkt.buffer);
-                pkt.field = client.id;
-                sprintf(resp, "Ok, new client logged in %s (id %d)", client.alias, client.id);
-                streamSendPacketNoResp(pkt, client.sockChannel);
+                strcpy (client->alias, (const char*)pkt.buffer);
+                pkt.field = client->id;
+                sprintf(resp, "Ok, new client logged in %s (id %d)", client->alias, client->id);
+                streamSendPacketNoResp(pkt, client->sockChannel);
                 break;
             }
 
             case CMD_LOGOFF:
             {
                 sendMsgNoResp ("Ok, client removed.", client);
-                unregisterClient (client); 
+                
+                client->connected = false;
+                close(client->sockChannel);
+                client->sockChannel = CHANNEL_FINISHED;
 
                 //printf("Ok: closig process\n");
                 //exit(0);
@@ -109,7 +115,7 @@ void Server::loop (RegisteredClient &client)
             case CMD_REMOVE_PACKET:
             {
                 ssize_t packId = pkt.field;
-                client.removePacketById (packId);
+                client->removePacketById (packId);
                 sprintf (resp, "Ok, packet %3lu removed", packId);
                 sendMsgNoResp(resp, client);
                 break;
@@ -117,19 +123,19 @@ void Server::loop (RegisteredClient &client)
 
             case CMD_GET_NUMBER_OF_PACKETS:
             {
-                pkt.field = client.msgQueue.packets.size();
-                streamSendPacketNoResp(pkt, client.sockChannel);
+                pkt.field = client->msgQueue.packets.size();
+                streamSendPacketNoResp(pkt, client->sockChannel);
                 break;
             }
 
             case CMD_DOWNLOAD_PACKETS:
             {
-                if (client.msgQueue.packets.size() != 0)
+                if (client->msgQueue.packets.size() != 0)
                 {
                     sendMsgNoResp("Sending packets", client);
 
-                    for (Packet pkt: client.msgQueue.packets)
-                        streamSendPacketNoResp(pkt, client.sockChannel);
+                    for (Packet pkt: client->msgQueue.packets)
+                        streamSendPacketNoResp(pkt, client->sockChannel);
                 }
 
                 else
@@ -139,7 +145,7 @@ void Server::loop (RegisteredClient &client)
 
             case CMD_CLEAR_PACKETS:
             {
-                client.clearPackets();
+                client->clearPackets();
                 sprintf (resp, "Ok, all packets deleted");
                 sendMsgNoResp(resp, client);
                 break;
@@ -155,26 +161,24 @@ void Server::loop (RegisteredClient &client)
                 break;
         }   
     }
+
+    else
+    {
+        printf ("Fork error...\n");
+        exit(0);
+    }
 }
 
 
-void Server::unregisterClient (RegisteredClient &client) // does not work
+Packet Server::recvPacket (RegisteredClient *client)
 {
-    client.connected = false;
-    close(client.sockChannel);
-    client.sockChannel = CHANNEL_FINISHED;
+    return streamRecvPacket (client->sockChannel);
 }
 
 
-Packet Server::recvPacket (RegisteredClient& client)
-{
-    return streamRecvPacket (client.sockChannel);
-}
-
-
-void Server::sendMsgNoResp (const char *msg, RegisteredClient& client)
+void Server::sendMsgNoResp (const char *msg, RegisteredClient *client)
 {
     Packet pSend;
     strcpy ((char*)pSend.buffer, msg);
-    streamSendPacketNoResp (pSend, client.sockChannel);
+    streamSendPacketNoResp (pSend, client->sockChannel);
 }

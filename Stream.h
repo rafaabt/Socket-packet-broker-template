@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <netinet/in.h>
+#include <arpa/inet.h>  // inet_pton
 #include <sys/socket.h>
 #include <unistd.h>
 #include "Packet.h"
@@ -11,6 +12,7 @@ using namespace std;
 
 
 #define CHANNEL_FINISHED 0x2A
+
 
 /*!   
 * Stream class. Handles low-level socket file descriptors
@@ -75,7 +77,35 @@ public:
         close (sockChannel);
     }
 
-    Packet streamSendPacket(const Packet &pSend, int channel) // sends the packet, and waits for the response
+
+    void conn(const char *addr, unsigned int port) //!< Connects to the server listening on a specific address and port
+    {
+        int status;
+
+        address.sin_port = htons(port);
+
+        // Convert IPv4 and IPv6 addresses from text to binary form
+        if (inet_pton(AF_INET, addr, &address.sin_addr) <= 0) 
+        {
+            printf("\nInvalid address/ Address not supported \n");
+            exit(0);
+        }
+
+        if ((status = connect(sockChannel, (struct sockaddr*)&address, sizeof(address))) < 0) 
+        {
+            printf("\nConnection Failed \n");
+            exit(0);
+        }
+    }
+
+
+    void closeSocket ()
+    {
+        close(sockChannel);
+    }
+
+
+    Packet streamSendPacket(const Packet &pSend, int channel) //!< Sends the packet, and waits for the response
     {
         ssize_t r = send(channel, (const void*)&pSend, sizeof(Packet), 0);
 
@@ -93,7 +123,7 @@ public:
         return streamSendPacket (pSend, sockChannel);	
     }
 
-    void streamSendPacketNoResp(const Packet &pSend, int channel) // juset sends a packet, there's no response
+    void streamSendPacketNoResp(const Packet &pSend, int channel) //!< Sends a packet, there's no response
     {
         ssize_t r = send(channel, (const void*)&pSend, sizeof(Packet), 0);
 
@@ -109,7 +139,7 @@ public:
         return streamSendPacketNoResp (pSend, sockChannel);
     }
 
-    Packet streamRecvPacket (int channel) // receives a packet
+    Packet streamRecvPacket (int channel) //!< Receives a packet
     {
         Packet pRecv;
 
@@ -138,10 +168,17 @@ public:
         return streamRecvPacket(sockChannel);
     }
 
-    bool isServerSide;
-    int sockServConn;   // server-side socket for connections
-    int sockChannel;    // channel to exchange data (server and clients)
+    int getServSockFd()
+    {
+        return sockServConn;
+    }
+
     struct sockaddr_in address;
+
+private:
+    int sockServConn;   //!< server-side socket for connections
+    int sockChannel;    //!< channel to exchange data (server and clients)
+    bool isServerSide;
 };
 
 #endif

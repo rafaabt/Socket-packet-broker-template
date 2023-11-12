@@ -7,7 +7,7 @@
 
 #define BUFF_SIZE   200
 #define MAX_PACKETS 100
-
+#define DEBUG_LINE  printf("%s %d\n", __FUNCTION__, __LINE__);
 
 enum  // Client->Server commands
 {	

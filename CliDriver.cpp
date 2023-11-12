@@ -6,7 +6,7 @@
 #define ADDR       "127.0.0.1"
 #define PORT       8080
 #define N_CLIENTS  1
-#define N_PACKETS  10
+#define N_PACKETS  5
 
 
 using namespace std;
@@ -35,12 +35,12 @@ int main(int argc, char const* argv[])
         {
             char str[100];
             sprintf (str, "Message %d from client %i", j, cli[i]->getId());
-            cli[i]->insertPacket(str, 0); //cli[0]->getId()); 
-            //cli[i]->sendMsg(str);
+            //cli[i]->insertPacket(str, 0); //cli[0]->getId()); 
+            cli[i]->sendMsg(str);
         }
     }
 
-#if 1
+#if 0
     printf("Downloaded packets: \n");
 
     for (int i = 0; i < N_CLIENTS; i++)
@@ -64,7 +64,6 @@ int main(int argc, char const* argv[])
     for (int i = 0; i < N_CLIENTS; i++)
     {
         cli[i]->closeConn();
-         sleep(1);
         delete cli[i];
     }
 

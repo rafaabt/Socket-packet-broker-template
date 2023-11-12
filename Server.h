@@ -13,8 +13,9 @@
 #include "Stream.h"
 #include "RegisteredClients.h"
 
-#define MAX_ON_CLIENTS 100
 
+#define MAX_ON_CLIENTS 100
+#define SLEEP_MS(MS)   usleep(MS*1000);
 
 using namespace std;
 
@@ -27,6 +28,7 @@ extern mutex mtxLock;
 * This class models a simple server for socket programming. 
 **/
 
+extern int lastAcceptedChannel;
 
 class Server: public Stream
 {
@@ -34,6 +36,7 @@ public:
     Server (ssize_t port):Stream(port)
     {
         nOnClients = 0;
+        lastAcceptedChannel = -1;
         registerClients.clear();
     }
 
@@ -51,24 +54,21 @@ public:
 
     static void LoopConnections (Server *serv)
     {
+        int servSockFd  = serv->getServSockFd();
         socklen_t addrlen = sizeof(serv->address);
 
         while (1)
         {
             int newSock;
 
-            if ((newSock = accept(serv->sockServConn, (struct sockaddr*)&serv->address, &addrlen)) < 0) 
+            if ((newSock = accept(servSockFd, (struct sockaddr*)&serv->address, &addrlen)) < 0) 
             {
                 perror("accept");
                 exit(EXIT_FAILURE);
             }
 
-            RegisteredClient newClient;
-
-            newClient.sockChannel = newSock;
-
             mtxLock.lock();
-            serv->registerClients.push_back(newClient);
+            lastAcceptedChannel = newSock;
             mtxLock.unlock();
         }
     } 
@@ -118,23 +118,29 @@ public:
 
     static void LoopRequests (Server *serv)
     {
+        vector<RegisteredClient>::iterator it;
+        size_t nCli = 0;
+
         while (true)
         {
-            vector<RegisteredClient>::iterator it;
-            size_t nCli;
-
             mtxLock.lock();
-            nCli = serv->registerClients.size();
-            mtxLock.unlock();
 
-            for (int i = 0; i < nCli; i++)
+            if (lastAcceptedChannel != -1) // A new client connected
             {
-                mtxLock.lock();
-                serv->loop (serv->registerClients[i]);
-                mtxLock.unlock();
+                RegisteredClient newClient;
+                newClient.sockChannel = lastAcceptedChannel;
+                lastAcceptedChannel   = -1;
+
+                serv->registerClients.push_back(newClient);
+                nCli = serv->registerClients.size();
             }
 
-            sleep(1);
+            mtxLock.unlock();
+
+            for (size_t i = 0; i < nCli; i++)
+                serv->loop (i);
+
+            SLEEP_MS(100)
         }
     }
 
@@ -142,14 +148,12 @@ public:
         \brief Creates a child process to wait for client requests
     */
 
-    void loop (RegisteredClient &client);
-    void sendMsgNoResp (const char *msg, RegisteredClient& client);
-    Packet recvPacket (RegisteredClient& client);
-    void unregisterClient (RegisteredClient &client);
+    void loop (uint32_t i);
+    void sendMsgNoResp (const char *msg, RegisteredClient *client);
+    Packet recvPacket (RegisteredClient *client);
 
 private:
     vector<RegisteredClient> registerClients;
-    map<uint32_t, RegisteredClient*> mapClient;
     uint32_t nOnClients;
 };
 

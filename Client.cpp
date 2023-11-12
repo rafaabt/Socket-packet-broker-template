@@ -1,26 +1,6 @@
 #include "Client.h"
 
 
-void Client::conn(const char *addr, unsigned int port)
-{
-    int status;
-
-    address.sin_port = htons(port);
-
-    // Convert IPv4 and IPv6 addresses from text to binary form
-    if (inet_pton(AF_INET, addr, &address.sin_addr) <= 0) 
-    {
-        printf("\nInvalid address/ Address not supported \n");
-        exit(0);
-    }
-
-    if ((status = connect(sockChannel, (struct sockaddr*)&address, sizeof(address))) < 0) 
-    {
-        printf("\nConnection Failed \n");
-        exit(0);
-    }
-}
-
 
 void Client::login (const char *alias)
 {
@@ -149,5 +129,5 @@ void Client::closeConn ()
     bzero (pSend.buffer, sizeof(void*)*BUFF_SIZE);
     Packet pkt = streamSendPacket (pSend);
     printf ("[Resp] %s\n", (char*)pkt.buffer);
-    close(sockChannel);	
+    closeSocket();	
 }

@@ -5,7 +5,6 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include <arpa/inet.h>  // inet_pton
 #include <cstring>      // memcpy
 #include "Stream.h"
 #include "Packet.h"
@@ -28,8 +27,6 @@ public:
     {}
 
 
-    /**< A more detailed description */
-    void conn(const char *addr, unsigned int port); //!< Connects to the server listening on a specific address and port
     void login (const char *alias);  //!< Logs to the server
 
 
@@ -46,8 +43,8 @@ public:
     void sendMsg (const char *msg);
     void sendMsgNoResp (const char *msg);
     void closeConn ();
+    uint32_t getId() { return id; }
 
-    uint32_t getId() { return id;}
 private:
     uint32_t id;
     size_t packetId;
