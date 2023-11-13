@@ -6,7 +6,7 @@ This repository implements a basic template for C++ socket programming (client/s
 Packets are generic and simple structures composed of a header, a command to the server, a general-purpose integer field and some bytes of generic type data.
 
 ## Compiling the code
-Run the two makefiles (server and client sides).
+Run `make server` and `make client` (for the server and client sides).
 
 
 ## Runnig the applications
