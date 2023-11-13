@@ -2,21 +2,20 @@
 
 
 mutex mtxLock;
-mutex xxx;
 int lastAcceptedChannel;
+uint32_t glNewIntRequest;
 
 
-const char *cmdStrings[20] =    
+const char *cmdStrings[N_CMDS] =    
 {
     "CMD_MSG",
     "CMD_LOGIN",
+    "CMD_LOGOFF",
     "CMD_INSERT_PACKET",
     "CMD_REMOVE_PACKET",
-    "CMD_CLEAR_PACKETS",
-    "CMD_LOGOFF",
-    "CMD_LIST_CLI",
     "CMD_DOWNLOAD_PACKETS",
-    "CMD_GET_NUMBER_OF_PACKETS"
+    "CMD_CLEAR_PACKETS",
+    "CMD_GET_NUMBER_OF_PACKETS",
 };
 
 
@@ -54,7 +53,7 @@ void Server::loop (uint32_t i)
 
         close(client->pipeFd[1]);
 
-        if (waitpid (cPid, &status, 0) == -1) // the process that writes waits before closing pipeFd[1]
+        if (waitpid (cPid, &status, WNOHANG) == -1) // the process that writes waits before closing pipeFd[1]
         {
             if (WIFEXITED(status)){
              //   printf("exited, status=%d\n", WEXITSTATUS(status));
@@ -82,7 +81,7 @@ void Server::loop (uint32_t i)
             return;
         }
 
-        if (pkt.cmd != CMD_LOGIN && !client->connected)
+        if (!client->connected && pkt.cmd != CMD_LOGIN)
         {
             sendMsgNoResp("Err. Client not logged in", client);
             return;
@@ -109,9 +108,6 @@ void Server::loop (uint32_t i)
                 client->connected = false;
                 close(client->sockChannel);
                 client->sockChannel = CHANNEL_FINISHED;
-
-                //printf("Ok: closig process\n");
-                //exit(0);
                 break;
             }
 

@@ -40,9 +40,10 @@ Command commands[] =
 #endif
 
 /*
-	Usage:
-	commands[0].function();
-	commands[1].function();
+Usage:
+commands[0].function();
+commands[1].function();
 */
+
 
 #endif

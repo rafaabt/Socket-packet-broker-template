@@ -37,7 +37,8 @@ int Stream::acceptConnection()
 
 void Stream::closeSocket ()
 {
-    close(sockChannel);
+    if (!isServerSide)
+        close(sockChannel);
 }
 
 

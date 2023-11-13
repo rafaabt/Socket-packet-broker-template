@@ -7,22 +7,23 @@
 
 #define BUFF_SIZE   200
 #define MAX_PACKETS 100
+#define N_CMDS      8
+
 #define DEBUG_LINE  printf("%s %d\n", __FUNCTION__, __LINE__);
 
 enum  // Client->Server commands
 {	
     CMD_MSG,
     CMD_LOGIN,
+    CMD_LOGOFF,
     CMD_INSERT_PACKET,
     CMD_REMOVE_PACKET,
-    CMD_CLEAR_PACKETS,
-    CMD_LOGOFF,
-    CMD_LIST_CLI,
     CMD_DOWNLOAD_PACKETS,
+    CMD_CLEAR_PACKETS,
     CMD_GET_NUMBER_OF_PACKETS,
 } Cmd;
 
-extern const char *cmdStrings[20];
+extern const char *cmdStrings[N_CMDS];
 
 typedef struct _Header
 {

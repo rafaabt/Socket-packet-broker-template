@@ -6,21 +6,17 @@
 
 #define ADDR       "127.0.0.1"
 #define PORT       8080
-#define N_CLIENTS  1
 #define N_PACKETS  2
 
 
 using namespace std;
 
-Client *cli[N_CLIENTS];
+Client *cli;
 
 static void closeClients(int unused) // Handles interrupts (e.g., from keyboard)
 {
-    for (int i = 0; i < N_CLIENTS; i++)
-    {
-        cli[i]->closeConn();
-        delete cli[i];
-    }
+    cli->closeConn();
+    delete cli;
     exit(0);
 }
 
@@ -31,55 +27,40 @@ int main(int argc, char const* argv[])
 
     signal(SIGINT, closeClients);
 
-    for (int i = 0; i < N_CLIENTS; i++)
-    {
-        cli[i] = new Client();
-        cli[i]->conn(ADDR, PORT);
-    }
+    cli = new Client();
+    cli->conn(ADDR, PORT);
+    
+    sprintf (alias, "@cli");
+    cli->login(alias);
 
-    for (int i = 0; i < N_CLIENTS; i++)
+    for (int i = 0; i < N_PACKETS; i++)
     {
-        sprintf (alias, "@cli_%2d", i);
-        cli[i]->login(alias);
+        char str[100];
+        sprintf (str, "Message %d from client %i", i, cli->getId());
+        //cli->insertPacket(str, 0); //cli->getId()); 
+        cli->sendMsg(str);
     }
-
-    for (int i = 0; i < N_CLIENTS; i++)
-    {
-        for (int j = 0; j < N_PACKETS; j++)
-        {
-            char str[100];
-            sprintf (str, "Message %d from client %i", j, cli[i]->getId());
-            //cli[i]->insertPacket(str, 0); //cli[0]->getId()); 
-            cli[i]->sendMsg(str);
-        }
-    }
-
+    
 #if 0
     printf("Downloaded packets: \n");
 
-    for (int i = 0; i < N_CLIENTS; i++)
-    {
-        cli[i]->downloadPackets();
-    }
+    cli->downloadPackets();
+    
 #if 0
-    for (int i = 0; i < N_CLIENTS; i++)
-    {
-        cli[i]->removePacket(4);
-        cli[i]->removePacket(5); 
-        //cli[i]->clearPackets();
-    }
+    cli->removePacket(4);
+    cli->removePacket(5); 
+    //cli->clearPackets();
+    
 
     printf("Downloaded packets after clear: \n");
-    for (int i = 0; i < N_CLIENTS; i++)
-        cli[i]->downloadPackets();
+
+    cli->downloadPackets();
 #endif
 #endif
 
-    for (int i = 0; i < N_CLIENTS; i++)
-    {
-        cli[i]->closeConn();
-        delete cli[i];
-    }
+    cli->closeConn();
+    delete cli;
+    
 
     return 0;
 }

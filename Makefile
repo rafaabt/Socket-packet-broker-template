@@ -18,7 +18,6 @@ client: CliDriver.cpp Client.o Stream.a
 Client.o: Client.cpp Stream.a Client.h Stream.h Packet.h utils.h
 	${CC} $< ${OPT} -c
 
-
 Stream.a: Stream.o
 	ar rcs $@ $<
 

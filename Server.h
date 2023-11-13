@@ -19,9 +19,9 @@
 
 using namespace std;
 
-
-extern mutex mtxLock, mtxLock2;
+extern mutex mtxLock;
 extern int lastAcceptedChannel;
+extern uint32_t glNewIntRequest;
 
 
 //! Server class  
@@ -37,7 +37,9 @@ public:
     {
         nOnClients = 0;
         lastAcceptedChannel = -1;
+        glNewIntRequest = 0;
         registerClients.clear();
+        signal(SIGCHLD, reapChild);
     }
 
     ~Server ()
@@ -45,6 +47,16 @@ public:
         registerClients.clear();
     }
 
+
+    static void reapChild(int unused) 
+    {
+        while (true) 
+        {
+            pid_t pid = waitpid(-1, NULL, WNOHANG);
+            if (pid <= 0) break; // note the < is now a <=
+            glNewIntRequest++;
+        }
+    }
     /*!
         LoopConnections(): 
 
@@ -56,7 +68,6 @@ public:
         while (1)
         {
             int newSock = serv->acceptConnection();
-
             mtxLock.lock();
             lastAcceptedChannel = newSock;
             mtxLock.unlock();
@@ -113,7 +124,6 @@ public:
                 RegisteredClient newClient;
                 newClient.sockChannel = lastAcceptedChannel;
                 lastAcceptedChannel   = -1;
-
                 serv->registerClients.push_back(newClient);
                 nCli = serv->registerClients.size();
             }
@@ -121,7 +131,9 @@ public:
             mtxLock.unlock();
 
             for (size_t i = 0; i < nCli; i++)
+            {
                 serv->loop (i);
+            }
 
             SLEEP_MS(100)
         }
