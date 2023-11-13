@@ -97,7 +97,7 @@ void Server::loop (uint32_t i)
 
                 strcpy (client->alias, (const char*)pkt.buffer);
                 pkt.field = client->id;
-                sprintf(resp, "Ok, new client logged in %s (id %d)", client->alias, client->id);
+                //sprintf(resp, "Ok, new client logged in %s (id %d)", client->alias, client->id);
                 streamSendPacketNoResp(pkt, client->sockChannel);
                 break;
             }

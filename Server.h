@@ -53,18 +53,9 @@ public:
 
     static void LoopConnections (Server *serv)
     {
-        int servSockFd  = serv->getServSockFd();
-        socklen_t addrlen = sizeof(serv->address);
-
         while (1)
         {
-            int newSock;
-
-            if ((newSock = accept(servSockFd, (struct sockaddr*)&serv->address, &addrlen)) < 0) 
-            {
-                perror("accept");
-                exit(EXIT_FAILURE);
-            }
+            int newSock = serv->acceptConnection();
 
             mtxLock.lock();
             lastAcceptedChannel = newSock;
