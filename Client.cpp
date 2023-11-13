@@ -40,7 +40,6 @@ void Client::removePacket (size_t packetId)
     pSend.cmd   = CMD_REMOVE_PACKET;
     pSend.field = packetId;
 
-
     Packet rcv = streamSendPacket (pSend);
     printf ("[Resp] %s\n", (char*)rcv.buffer);
 }
@@ -77,7 +76,6 @@ void Client::downloadPackets ()
     printf("[Resp] %s\n", (char*)pktResp.buffer);
 
     printf("Total packets: %u\n", nPackets);
-
     printf("[Resp]: \n");
 
     for (size_t i = 0 ; i < nPackets; i++)
@@ -91,7 +89,6 @@ void Client::clearPackets ()
 {
     Packet pSend;
     pSend.header.senderId = id;
-    //pSend.header.packetId = packetId++;
     pSend.cmd = CMD_CLEAR_PACKETS;
 
     Packet pkt = streamSendPacket (pSend);
@@ -102,7 +99,6 @@ void Client::sendMsg (const char *msg)
 {	
     Packet pSend;
     pSend.header.senderId = id;
-    //pSend.header.packetId = packetId++;
     pSend.cmd = CMD_MSG;
 
     strcpy ((char*)pSend.buffer, msg);
@@ -114,7 +110,6 @@ void Client::sendMsgNoResp (const char *msg)
 {	
     Packet pSend;
     pSend.header.senderId = id;
-    //pSend.header.packetId = packetId++;
     pSend.cmd = CMD_MSG;
 
     strcpy ((char*)pSend.buffer, msg);

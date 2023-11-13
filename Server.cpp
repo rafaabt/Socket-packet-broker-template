@@ -34,24 +34,44 @@ void Server::loop (uint32_t i)
 
     pid_t cPid = fork();
 
-    if (cPid == 0) // client requests are handled in a child process  
+    if (cPid == 0) // client requests are received in a child process  
     {
         Packet pkt; 
 
-        pkt = recvPacket(client);
         close (client->pipeFd[0]);
+
+        pkt = recvPacket(client);
         int r = write (client->pipeFd[1], (void*)&pkt, sizeof(Packet));
+
+        close (client->pipeFd[1]);
         exit(0);
     }
 
     else if (cPid > 0)
     {
+        Packet pkt;
         int status;
-        wait (&status);
+
         close(client->pipeFd[1]);
 
-        Packet pkt;
+        if (waitpid (cPid, &status, 0) == -1) // the process that writes waits before closing pipeFd[1]
+        {
+            if (WIFEXITED(status)){
+             //   printf("exited, status=%d\n", WEXITSTATUS(status));
+            }
+            
+            else if (WIFSIGNALED(status)) 
+                printf("killed by signal %d\n", WTERMSIG(status));
+            
+            else if (WIFSTOPPED(status)) 
+                printf("stopped by signal %d\n", WSTOPSIG(status)); 
+            
+            else if (WIFCONTINUED(status)) 
+                printf("continued\n");
+        }
+
         int n = read (client->pipeFd[0], (void*)&pkt, sizeof(Packet));
+        close (client->pipeFd[0]);
 
         printf ("[Request]:\n - Buffer: %s\n - Command: %s\n", (char*)pkt.buffer, cmdStrings[pkt.cmd]);
 

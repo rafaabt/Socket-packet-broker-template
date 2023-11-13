@@ -1,21 +1,35 @@
 // Client side C/C++ program to demonstrate Socket programming
 
 #include <iostream>
+#include <csignal>
 #include "Client.h"
 
 #define ADDR       "127.0.0.1"
 #define PORT       8080
 #define N_CLIENTS  1
-#define N_PACKETS  5
+#define N_PACKETS  2
 
 
 using namespace std;
 
+Client *cli[N_CLIENTS];
+
+static void closeClients(int unused) // Handles interrupts (e.g., from keyboard)
+{
+    for (int i = 0; i < N_CLIENTS; i++)
+    {
+        cli[i]->closeConn();
+        delete cli[i];
+    }
+    exit(0);
+}
+
 
 int main(int argc, char const* argv[])
 {		
-    Client *cli[N_CLIENTS];
     char alias[20];
+
+    signal(SIGINT, closeClients);
 
     for (int i = 0; i < N_CLIENTS; i++)
     {

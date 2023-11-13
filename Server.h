@@ -20,7 +20,8 @@
 using namespace std;
 
 
-extern mutex mtxLock;
+extern mutex mtxLock, mtxLock2;
+extern int lastAcceptedChannel;
 
 
 //! Server class  
@@ -28,7 +29,6 @@ extern mutex mtxLock;
 * This class models a simple server for socket programming. 
 **/
 
-extern int lastAcceptedChannel;
 
 class Server: public Stream
 {
@@ -44,7 +44,6 @@ public:
     {
         registerClients.clear();
     }
-
 
     /*!
         LoopConnections(): 
@@ -84,34 +83,27 @@ public:
     * 
     *  The basic operation is as follows:
     * 
-    *  \code{.cpp}
-    *   
-    *   int fd[2];
+    * \code{.cpp}  
+    *   int r = pipe(client->pipeFd);
+    *   pid_t cPid = fork();
+    * 
+    *   if (cPid == 0) // client requests received in a child process  
+    *   {
+    *       Packet pkt; 
+    *       close (client->pipeFd[0]);
+    *       pkt = recvPacket(client);
+    *       int r = write (client->pipeFd[1], (void*)&pkt, sizeof(Packet));
+    *       close (client->pipeFd[1]);
+    *       exit(0);
+    *   }
     *
-    *   if (client.sockChannel == CHANNEL_FINISHED) // If the client has already closed the channel, don't wait for its requests
-    *        return; 
-    *
-    *    pipe(fd);
-    *    pid_t cPid = fork();
-    *
-    *    if (cPid == 0) // client requests are handled in a child process  
-    *    {
-    *        Packet pkt; 
-    *        pkt = recvPacket(client);
-    *        close (fd[0]);
-    *        write (fd[1], (void*)&pkt, sizeof(Packet)); // Sends requests to the parent process
-    *        exit(0);
-    *    }
-    *
-    *    else if (cPid > 0) // Parent process
-    *    {
-    *        int status;
-    *        wait (&status);
-    *        close(fd[1]);
-    *        Packet pkt;
-    *        int n = read (fd[0], (void*)&pkt, sizeof(Packet)); // Gets the packet from the child process
-    *        //...proceeds to handle the packet
-    *        // ...  
+    *   else if (cPid > 0)
+    *   {
+    *       Packet pkt;
+    *       close(client->pipeFd[1]);
+    *       int n = read (client->pipeFd[0], (void*)&pkt, sizeof(Packet));
+    *       close (client->pipeFd[0]);
+    *       //... proceeds to handle the request   
     *   }
     *  \endcode
     */  
