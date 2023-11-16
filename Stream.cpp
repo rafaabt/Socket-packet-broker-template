@@ -1,6 +1,7 @@
 #include "Stream.h"
 
-void Stream::conn(const char *addr, unsigned int port) //!< Connects to the server listening on a specific address and port
+
+void St::Stream::conn(const char *addr, unsigned int port) //!< Connects to the server listening on a specific address and port
 {
     int status;
 
@@ -13,7 +14,7 @@ void Stream::conn(const char *addr, unsigned int port) //!< Connects to the serv
         exit(0);
     }
 
-    if ((status = connect(sockChannel, (struct sockaddr*)&address, sizeof(address))) < 0) 
+    if ((status = connect(clientSock, (struct sockaddr*)&address, sizeof(address))) < 0) 
     {
         printf("\nConnection Failed \n");
         exit(0);
@@ -21,12 +22,12 @@ void Stream::conn(const char *addr, unsigned int port) //!< Connects to the serv
 }
 
 
-int Stream::acceptConnection()
+int St::Stream::acceptConnection()
 {
     int newSock;
     socklen_t addrlen = sizeof(address);
 
-    if ((newSock = accept(sockServConn, (struct sockaddr*)&address, &addrlen)) < 0) 
+    if ((newSock = accept(serverSock, (struct sockaddr*)&address, &addrlen)) < 0) 
     {
         perror("accept");
         exit(EXIT_FAILURE);
@@ -35,14 +36,15 @@ int Stream::acceptConnection()
 }
 
 
-void Stream::closeSocket ()
+void St::Stream::closeSocket ()
 {
     if (!isServerSide)
-        close(sockChannel);
+        close(clientSock);
+    close (clientSock);
 }
 
 
-Packet Stream::streamSendPacket(const Packet &pSend, int channel) //!< Sends the packet, and waits for the response
+Packet St::Stream::streamSendPacket(const Packet &pSend, int channel) //!< Sends the packet, and waits for the response
 {
     ssize_t r = send(channel, (const void*)&pSend, sizeof(Packet), 0);
 
@@ -56,13 +58,13 @@ Packet Stream::streamSendPacket(const Packet &pSend, int channel) //!< Sends the
 }
 
 
-Packet Stream::streamSendPacket(const Packet &pSend)
+Packet St::Stream::streamSendPacket(const Packet &pSend)
 {
-    return streamSendPacket (pSend, sockChannel);   
+    return streamSendPacket (pSend, clientSock);   
 }
 
 
-void Stream::streamSendPacketNoResp(const Packet &pSend, int channel) //!< Sends a packet, there's no response
+void St::Stream::streamSendPacketNoResp(const Packet &pSend, int channel) //!< Sends a packet, there's no response
 {
     ssize_t r = send(channel, (const void*)&pSend, sizeof(Packet), 0);
 
@@ -74,13 +76,13 @@ void Stream::streamSendPacketNoResp(const Packet &pSend, int channel) //!< Sends
 }
 
 
-void Stream::streamSendPacketNoResp (const Packet &pSend)
+void St::Stream::streamSendPacketNoResp (const Packet &pSend)
 {
-    return streamSendPacketNoResp (pSend, sockChannel);
+    return St::Stream::streamSendPacketNoResp (pSend, clientSock);
 }
 
 
-Packet Stream::streamRecvPacket (int channel) //!< Receives a packet
+Packet St::Stream::streamRecvPacket (int channel) //!< Receives a packet
 {
     Packet pRecv;
 
@@ -105,13 +107,13 @@ Packet Stream::streamRecvPacket (int channel) //!< Receives a packet
 }
 
 
-Packet Stream::streamRecvPacket ()
+Packet St::Stream::streamRecvPacket ()
 {
-    return streamRecvPacket(sockChannel);
+    return St::Stream::streamRecvPacket(clientSock);
 }
 
 
-int Stream::getServSockFd()
+int St::Stream::getServSockFd()
 {
-    return sockServConn;
+    return serverSock;
 }

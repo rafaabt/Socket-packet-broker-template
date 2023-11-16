@@ -1,6 +1,7 @@
 #include "Client.h"
 
 
+using namespace St;
 
 void Client::login (const char *alias)
 {

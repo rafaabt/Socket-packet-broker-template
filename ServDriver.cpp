@@ -6,14 +6,12 @@
 
 #define PORT 8080
 
-using namespace std;
-
 
 int main(int argc, char const* argv[])
 {
     Server *serv = new Server(PORT);
-    thread thConn(Server::LoopConnections, ref(serv));
-    thread thLoop(Server::LoopRequests,    ref(serv));
+    std::thread thConn(Server::LoopConnections, std::ref(serv));
+    std::thread thLoop(Server::LoopRequests,    std::ref(serv));
 
     thConn.join();
     thLoop.join();

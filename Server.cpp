@@ -1,7 +1,7 @@
 #include "Server.h"
 
 
-mutex mtxLock;
+std::mutex mtxLock;
 int lastAcceptedChannel;
 uint32_t glNewIntRequest;
 
@@ -26,7 +26,7 @@ void Server::loop (uint32_t i)
 
     RegisteredClient *client = &registerClients[i];
 
-    if (client->sockChannel == CHANNEL_FINISHED)  // If the client has already closed the channel, don't wait for its requests
+    if (client->clientSock == CHANNEL_FINISHED)  // If the client has already closed the channel, don't wait for its requests
         return; 
 
     int r = pipe(client->pipeFd);
@@ -97,7 +97,7 @@ void Server::loop (uint32_t i)
                 strcpy (client->alias, (const char*)pkt.buffer);
                 pkt.field = client->id;
                 //sprintf(resp, "Ok, new client logged in %s (id %d)", client->alias, client->id);
-                streamSendPacketNoResp(pkt, client->sockChannel);
+                St::Stream::streamSendPacketNoResp(pkt, client->clientSock);
                 break;
             }
 
@@ -106,8 +106,8 @@ void Server::loop (uint32_t i)
                 sendMsgNoResp ("Ok, client removed.", client);
                 
                 client->connected = false;
-                close(client->sockChannel);
-                client->sockChannel = CHANNEL_FINISHED;
+                close(client->clientSock);
+                client->clientSock = CHANNEL_FINISHED;
                 break;
             }
 
@@ -140,7 +140,7 @@ void Server::loop (uint32_t i)
             case CMD_GET_NUMBER_OF_PACKETS:
             {
                 pkt.field = client->msgQueue.packets.size();
-                streamSendPacketNoResp(pkt, client->sockChannel);
+                St::Stream::streamSendPacketNoResp(pkt, client->clientSock);
                 break;
             }
 
@@ -151,7 +151,7 @@ void Server::loop (uint32_t i)
                     sendMsgNoResp("Sending packets", client);
 
                     for (Packet pkt: client->msgQueue.packets)
-                        streamSendPacketNoResp(pkt, client->sockChannel);
+                        St::Stream::streamSendPacketNoResp(pkt, client->clientSock);
                 }
 
                 else
@@ -188,7 +188,7 @@ void Server::loop (uint32_t i)
 
 Packet Server::recvPacket (RegisteredClient *client)
 {
-    return streamRecvPacket (client->sockChannel);
+    return St::Stream::streamRecvPacket (client->clientSock);
 }
 
 
@@ -196,5 +196,5 @@ void Server::sendMsgNoResp (const char *msg, RegisteredClient *client)
 {
     Packet pSend;
     strcpy ((char*)pSend.buffer, msg);
-    streamSendPacketNoResp (pSend, client->sockChannel);
+    St::Stream::streamSendPacketNoResp (pSend, client->clientSock);
 }

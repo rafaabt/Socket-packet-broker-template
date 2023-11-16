@@ -27,6 +27,37 @@ int main(int argc, char const* argv[])
 
     signal(SIGINT, closeClients);
 
+#if 0 
+    Client c2({
+        .mConnect = [](auto *p)
+        { 
+            struct UserData *user = (UserData*)p;
+            cout << "Connecting\n";
+            cout << "user: " << user->id << "\ndata: " << user->data << endl;
+        },
+        .mSend = []()
+        { 
+            cout << "Sending\n"; 
+        },
+        .mRecv = []()
+        { 
+            cout << "Receiving\n"; 
+        }
+    });
+
+    UserData u = 
+    {
+        .id = 42,
+        .data = 4242
+    };
+
+    c2.mConnect(&u);
+
+    c2.mSend();
+    c2.mRecv();
+    exit(0);
+#endif
+
     cli = new Client();
     cli->conn(ADDR, PORT);
     
@@ -59,6 +90,7 @@ int main(int argc, char const* argv[])
 #endif
 
     cli->closeConn();
+
     delete cli;
     
 

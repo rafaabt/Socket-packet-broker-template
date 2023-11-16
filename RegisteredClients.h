@@ -16,7 +16,7 @@ typedef struct  _RegisteredClient
     int id;
     char alias[30];
     int pipeFd[2];
-    int sockChannel;
+    int clientSock;
     bool connected = false;
     MsgQueue msgQueue;	//!< Client message queue
 

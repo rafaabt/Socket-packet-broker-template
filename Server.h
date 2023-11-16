@@ -17,9 +17,8 @@
 #define MAX_ON_CLIENTS 100
 #define SLEEP_MS(MS)   usleep(MS*1000);
 
-using namespace std;
 
-extern mutex mtxLock;
+extern std::mutex mtxLock;
 extern int lastAcceptedChannel;
 extern uint32_t glNewIntRequest;
 
@@ -30,10 +29,10 @@ extern uint32_t glNewIntRequest;
 **/
 
 
-class Server: public Stream
+class Server: public St::Stream
 {
 public:
-    Server (ssize_t port):Stream(port)
+    Server (ssize_t port):St::Stream(port)
     {
         nOnClients = 0;
         lastAcceptedChannel = -1;
@@ -112,7 +111,7 @@ public:
 
     static void LoopRequests (Server *serv)
     {
-        vector<RegisteredClient>::iterator it;
+        std::vector<RegisteredClient>::iterator it;
         size_t nCli = 0;
 
         while (true)
@@ -122,9 +121,9 @@ public:
             if (lastAcceptedChannel != -1) // A new client connected
             {
                 RegisteredClient newClient;
-                newClient.sockChannel = lastAcceptedChannel;
+                newClient.clientSock  = lastAcceptedChannel;
                 lastAcceptedChannel   = -1;
-                serv->registerClients.push_back(newClient);
+                serv->registerClients.push_back(std::move(newClient));
                 nCli = serv->registerClients.size();
             }
 
@@ -148,7 +147,7 @@ public:
     Packet recvPacket (RegisteredClient *client);
 
 private:
-    vector<RegisteredClient> registerClients;
+    std::vector<RegisteredClient> registerClients;
     uint32_t nOnClients;
 };
 
